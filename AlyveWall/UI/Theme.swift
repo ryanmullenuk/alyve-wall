@@ -14,13 +14,15 @@ enum Theme {
 
 struct Wordmark: View {
     var size: CGFloat = 18
+    /// Extra letter spacing, animated by the splash screen.
+    var spread: CGFloat = 0
     var body: some View {
         HStack(spacing: size * 0.35) {
             Text("ALYVE").foregroundStyle(Theme.glow)
             Text("WALL").foregroundStyle(.white)
         }
         .font(.system(size: size, weight: .heavy, design: .rounded))
-        .tracking(size * 0.22)
+        .tracking(size * 0.22 + spread)
     }
 }
 

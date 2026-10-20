@@ -1,0 +1,8 @@
+ALYVE WALL makes animated wallpapers on device. No account or sign-in is needed.
+
+To review:
+1. Pick a style on the Style tab, change colours on the Colours tab, and optionally add an image on the Image tab.
+2. Tap Export wallpaper. Choose MP4 Video, Live Photo or Still, then create it. Videos can be saved to Photos, saved to Files or shared. Live Photos are saved to Photos, and the app explains how to set one as the Lock Screen wallpaper.
+3. Premium (non-consumable, games.redhead.alyvewall.premium) is offered from the crown button and from the export screen. It removes the watermark and unlocks larger sizes and 60 fps. Restore Purchase is on the same screen.
+
+The Photos permission is used only to save wallpapers the user creates. The Mac version is the same app built with Mac Catalyst, and the purchase is shared across iPhone, iPad and Mac.

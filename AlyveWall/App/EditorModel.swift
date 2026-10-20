@@ -34,8 +34,17 @@ final class EditorModel {
         } else {
             config = WallpaperConfig()
         }
-        if let raw = UserDefaults.standard.string(forKey: Keys.target), let t = DeviceTarget(rawValue: raw) { target = t }
+        if let raw = UserDefaults.standard.string(forKey: Keys.target), let t = DeviceTarget(rawValue: raw) {
+            target = t
+        } else {
+            #if targetEnvironment(macCatalyst)
+            target = .mac
+            #endif
+        }
         overlay = Self.loadOverlay()
+        #if DEBUG
+        Demo.apply(to: self)
+        #endif
     }
 
     // MARK: - Colours

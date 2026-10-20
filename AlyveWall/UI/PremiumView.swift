@@ -14,7 +14,7 @@ struct PremiumView: View {
 
     var body: some View {
         ZStack {
-            Theme.background.ignoresSafeArea()
+            BrandBackdrop(dim: 0.55)
             RadialGradient(colors: [Theme.accent.opacity(0.35), .clear], center: .top, startRadius: 10, endRadius: 420)
                 .ignoresSafeArea()
             ScrollView {
@@ -82,7 +82,7 @@ struct PremiumView: View {
                         Text(message).font(.footnote).foregroundStyle(.secondary).multilineTextAlignment(.center)
                     }
 
-                    if PremiumStore.isTesterBuild {
+                    if PremiumStore.isTesterBuild && !UserDefaults.standard.bool(forKey: "hideTester") {
                         Toggle("Unlock Premium for testing", isOn: Binding(get: { store.testerUnlocked }, set: { store.setTesterPremium($0) }))
                             .font(.footnote)
                             .padding(12)
@@ -96,6 +96,9 @@ struct PremiumView: View {
             }
         }
         .preferredColorScheme(.dark)
+        #if targetEnvironment(macCatalyst)
+        .frame(minWidth: 560, idealWidth: 600, minHeight: 760, idealHeight: 820)
+        #endif
         .onChange(of: store.isPremium) { _, unlocked in
             if unlocked { Task { try? await Task.sleep(for: .seconds(1)); dismiss() } }
         }

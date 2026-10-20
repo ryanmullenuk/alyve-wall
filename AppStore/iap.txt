@@ -1,0 +1,8 @@
+Reference name: Premium
+Product ID: games.redhead.alyvewall.premium
+Type: Non-consumable
+Price: £1.99 (GBP tier)
+Display name: ALYVE WALL Premium
+Description: No watermark, all sizes up to 5K, 60 fps
+Review screenshot: iap-review.png
+Review note: Unlocks watermark-free exports, every iPhone and Mac size up to 5K, 60 fps video and Full HD Live Photos. Offered from the crown button and the export screen.

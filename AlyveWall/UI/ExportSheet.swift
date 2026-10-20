@@ -109,13 +109,22 @@ struct ExportSheet: View {
     @State private var size: ExportSize = ExportSize.iphone[0]
     @State private var fps = 30
     @State private var showPremium = false
+    @State private var showMover = false
+
+    static var isMac: Bool {
+        #if targetEnvironment(macCatalyst)
+        true
+        #else
+        false
+        #endif
+    }
 
     private var premium: Bool { store.isPremium }
 
     var body: some View {
         NavigationStack {
             ZStack {
-                Theme.background.ignoresSafeArea()
+                BrandBackdrop(dim: 0.55)
                 switch job.state {
                 case .idle, .failed: options
                 case .working(let p): working(p)
@@ -133,8 +142,11 @@ struct ExportSheet: View {
             }
         }
         .presentationDetents([.large])
+        #if targetEnvironment(macCatalyst)
+        .frame(minWidth: 560, idealWidth: 600, minHeight: 760, idealHeight: 820)
+        #endif
         .interactiveDismissDisabled(job.isWorking)
-        .sheet(isPresented: $showPremium) { PremiumView() }
+        .sheet(isPresented: $showPremium) { PremiumView().environment(store) }
         .onAppear {
             target = model.target
             size = bestSize(for: target)
@@ -325,8 +337,19 @@ struct ExportSheet: View {
                 if case .live = result {
                     EmptyView()
                 } else {
+                    Button {
+                        showMover = true
+                    } label: {
+                        Label(Self.isMac ? "Save to a folder…" : "Save to Files", systemImage: "folder")
+                            .font(.headline).frame(maxWidth: .infinity).padding(.vertical, 14)
+                            .background(Theme.card, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                    }
+                    .buttonStyle(.plain)
+                    .fileMover(isPresented: $showMover, file: result.shareURL) { outcome in
+                        if case .success = outcome { job.saveMessage = "Saved to Files" }
+                    }
                     ShareLink(item: result.shareURL) {
-                        Label("Share or AirDrop to Mac", systemImage: "square.and.arrow.up")
+                        Label(Self.isMac ? "Share…" : "Share or AirDrop to Mac", systemImage: "square.and.arrow.up")
                             .font(.headline).frame(maxWidth: .infinity).padding(.vertical, 14)
                             .background(Theme.card, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
                     }
@@ -337,7 +360,8 @@ struct ExportSheet: View {
             .padding(.horizontal, 24)
 
             if let message = job.saveMessage, message != "Saved to Photos" {
-                Text(message).font(.footnote).foregroundStyle(.orange).multilineTextAlignment(.center).padding(.horizontal, 24)
+                let ok = message == "Saved to Files"
+                Text(message).font(.footnote).foregroundStyle(ok ? Color.green : Color.orange).multilineTextAlignment(.center).padding(.horizontal, 24)
             }
         }
     }

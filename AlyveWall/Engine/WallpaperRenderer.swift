@@ -95,6 +95,7 @@ final class WallpaperRenderer: @unchecked Sendable {
         }
 
         drawForeground(ctx, p: p)
+        if config.dotGrid { Brand.drawGrid(ctx, width: W, height: H, pitch: max(3, S / 150)) }
 
         if let img = overlay, config.overlay.placement == .logo { drawLogo(img, ctx: ctx, p: p) }
         if watermark { drawWatermark(ctx) }

@@ -22,35 +22,68 @@ struct EditorView: View {
     @State private var showPremium = false
 
     var body: some View {
-        @Bindable var model = model
-        ZStack {
-            Theme.background.ignoresSafeArea()
-            VStack(spacing: 12) {
-                header
-                LivePreview()
-                    .padding(.horizontal, 20)
-                    .frame(maxHeight: .infinity)
-                tabBar
-                ScrollView {
-                    Group {
-                        switch tab {
-                        case .style: StylePanel()
-                        case .colours: ColoursPanel()
-                        case .image: ImagePanel()
-                        case .motion: MotionPanel()
+        GeometryReader { geo in
+            let wide = geo.size.width > 820 && geo.size.width > geo.size.height * 1.05
+            ZStack {
+                BrandBackdrop(dim: 0.45)
+                if wide {
+                    HStack(spacing: 0) {
+                        VStack(spacing: 12) {
+                            header
+                            LivePreview()
+                                .padding(24)
+                                .frame(maxHeight: .infinity)
                         }
+                        VStack(spacing: 12) {
+                            tabBar
+                            panel.frame(maxHeight: .infinity)
+                            exportButton
+                        }
+                        .frame(width: min(440, geo.size.width * 0.4))
+                        .padding(.vertical, 12)
+                        .background(Color.black.opacity(0.35))
                     }
-                    .padding(.horizontal, 16)
-                    .padding(.bottom, 8)
+                } else {
+                    VStack(spacing: 12) {
+                        header
+                        LivePreview()
+                            .padding(.horizontal, 20)
+                            .frame(maxHeight: .infinity)
+                        tabBar
+                        panel.frame(height: 250)
+                        exportButton
+                    }
+                    .padding(.top, 4)
                 }
-                .frame(height: 250)
-                .scrollIndicators(.hidden)
-                exportButton
             }
-            .padding(.top, 4)
         }
-        .sheet(isPresented: $showExport) { ExportSheet() }
-        .sheet(isPresented: $showPremium) { PremiumView() }
+        .sheet(isPresented: $showExport) { ExportSheet().environment(model).environment(store) }
+        .sheet(isPresented: $showPremium) { PremiumView().environment(store) }
+        #if DEBUG
+        .task {
+            if let t = Demo.string("demoTab").flatMap({ Tab(rawValue: $0.capitalized) }) { tab = t }
+            guard let sheet = Demo.string("demoSheet") else { return }
+            try? await Task.sleep(for: .seconds(1))
+            if sheet == "export" { showExport = true }
+            if sheet == "premium" { showPremium = true }
+        }
+        #endif
+    }
+
+    private var panel: some View {
+        ScrollView {
+            Group {
+                switch tab {
+                case .style: StylePanel()
+                case .colours: ColoursPanel()
+                case .image: ImagePanel()
+                case .motion: MotionPanel()
+                }
+            }
+            .padding(.horizontal, 16)
+            .padding(.bottom, 8)
+        }
+        .scrollIndicators(.hidden)
     }
 
     private var header: some View {
@@ -379,6 +412,12 @@ struct MotionPanel: View {
             SliderRow(title: "Amount", value: $model.config.density)
             SliderRow(title: "Size", value: $model.config.size)
             SliderRow(title: "Glow", value: $model.config.intensity)
+            Toggle(isOn: $model.config.dotGrid) {
+                VStack(alignment: .leading, spacing: 1) {
+                    Text("Dot screen").font(.subheadline.weight(.medium))
+                    Text("A fine LED dot grid over the whole wallpaper").font(.caption).foregroundStyle(.secondary)
+                }
+            }
             VStack(alignment: .leading, spacing: 6) {
                 Text("Loop length").font(.subheadline.weight(.medium))
                 Picker("Loop length", selection: $model.config.loopSeconds) {

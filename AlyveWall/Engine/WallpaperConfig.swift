@@ -90,7 +90,7 @@ struct OverlaySettings: Codable, Equatable, Sendable {
 
 struct WallpaperConfig: Codable, Equatable, Sendable {
     var style: WallpaperStyle = .gradient
-    var colors: [RGB] = Palette.all[0].colors
+    var colors: [RGB] = Brand.palette.colors
     var speed = 1.0
     var density = 0.5
     var size = 0.5
@@ -98,7 +98,27 @@ struct WallpaperConfig: Codable, Equatable, Sendable {
     /// Length of one seamless loop. Every motion completes a whole number of cycles in it.
     var loopSeconds = 10.0
     var seed: UInt64 = 7
+    /// LED-style dot screen over the whole animation.
+    var dotGrid = false
     var overlay = OverlaySettings()
+
+    init() {}
+
+    /// Missing keys fall back to defaults, so designs saved by older versions still load.
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        let d = WallpaperConfig()
+        style = try c.decodeIfPresent(WallpaperStyle.self, forKey: .style) ?? d.style
+        colors = try c.decodeIfPresent([RGB].self, forKey: .colors) ?? d.colors
+        speed = try c.decodeIfPresent(Double.self, forKey: .speed) ?? d.speed
+        density = try c.decodeIfPresent(Double.self, forKey: .density) ?? d.density
+        size = try c.decodeIfPresent(Double.self, forKey: .size) ?? d.size
+        intensity = try c.decodeIfPresent(Double.self, forKey: .intensity) ?? d.intensity
+        loopSeconds = try c.decodeIfPresent(Double.self, forKey: .loopSeconds) ?? d.loopSeconds
+        seed = try c.decodeIfPresent(UInt64.self, forKey: .seed) ?? d.seed
+        dotGrid = try c.decodeIfPresent(Bool.self, forKey: .dotGrid) ?? d.dotGrid
+        overlay = try c.decodeIfPresent(OverlaySettings.self, forKey: .overlay) ?? d.overlay
+    }
 
     static let maxColors = 5
     static let minColors = 2
@@ -117,6 +137,7 @@ struct Palette: Identifiable, Sendable {
     var id: String { name }
 
     static let all: [Palette] = [
+        Brand.palette,
         Palette(name: "Dusk", colors: [RGB(hex: 0x2B1055), RGB(hex: 0x7597DE), RGB(hex: 0xF27BBD), RGB(hex: 0xFFB36B)]),
         Palette(name: "Ocean", colors: [RGB(hex: 0x021B3A), RGB(hex: 0x0A6C9E), RGB(hex: 0x2EC4B6), RGB(hex: 0xA8F0E8)]),
         Palette(name: "Aurora", colors: [RGB(hex: 0x050A1F), RGB(hex: 0x1DE9B6), RGB(hex: 0x7C4DFF), RGB(hex: 0x00B0FF)]),
